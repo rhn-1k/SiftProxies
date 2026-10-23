@@ -10,7 +10,8 @@ Collects the proxy list from a huge different sources and compares them to extra
 You could find the list in [proxies.txt](proxies.txt)
 
 > [!WARNING]
-> free proxies are untrusted. Don't send passwords or other sensitive data through them.
+> free proxies are untrusted. don't send passwords or other sensitive data through them.
+>
 > proxies can die at any time, so always re-download the list instead of keeping an old copy.
 
 ### Status
