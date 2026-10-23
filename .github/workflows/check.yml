@@ -56,6 +56,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add good_proxies.txt status.txt
+          mv good_proxies.txt proxies.txt
+          git add proxies.txt status.txt
           git commit -m "system: add ${{ steps.compare.outputs.add }}, remove ${{ steps.compare.outputs.del }} proxies"
           git push
