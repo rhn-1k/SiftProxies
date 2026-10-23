@@ -1,0 +1,3 @@
+Working proxies: 346/412 (84.0%)
+Dead proxies: 66/412 (16.0%)
+Average ping: 257 ms
