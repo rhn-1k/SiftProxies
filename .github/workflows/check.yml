@@ -1,0 +1,61 @@
+name: Update proxies
+
+on:
+  schedule:
+    - cron: '0 */5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch Source
+        run: |
+          git clone https://${{ secrets.GIT_TOKEN }}@github.com/rhn-1k/proxy-source.git temp
+          cp -r temp/* .
+          rm -rf temp
+
+      - name: install deps
+        run: pip install requests
+
+      - name: Run proxy.py
+        run: python proxy.py
+
+      - name: Compare
+        id: compare
+        run: |
+          git add -N good_proxies.txt
+          set -- $(git diff --numstat -- good_proxies.txt)
+          add=${1:-0}
+          del=${2:-0}
+          echo "add=$add" >> "$GITHUB_OUTPUT"
+          echo "del=$del" >> "$GITHUB_OUTPUT"
+          if [ "$add" -eq 0 ] && [ "$del" -eq 0 ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Nothing changed, skipping"
+            echo "### No changes detected" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate status
+        if: steps.compare.outputs.changed == 'true'
+        run: bash check.sh
+
+      - name: Commit and push
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add good_proxies.txt status.txt
+          git commit -m "system: add ${{ steps.compare.outputs.add }}, remove ${{ steps.compare.outputs.del }} proxies"
+          git push
